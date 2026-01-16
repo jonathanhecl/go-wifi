@@ -35,12 +35,20 @@ type Attack struct {
 	process *os.Process
 }
 
-// Quick hack to edit process
+// Init sets the process and marks the attack as running
 func (a *Attack) Init(proc *os.Process) {
 	a.process = proc
+	a.Running = true
 }
 
+// Stop stops the attack by killing the process
 func (a *Attack) Stop() error {
+	if a.process == nil {
+		a.Running = false
+		a.Stopped = time.Now().String()
+		return nil
+	}
+
 	err := a.process.Kill()
 	if err != nil {
 		return err
