@@ -139,13 +139,13 @@ func (a *AP) Capture(iface string) (attacks.Attack, captures.Capture, error) {
 
 	// Make a specific dir so we do not mix captures
 	// TODO: change mode
-	err := os.Mkdir(path, 766)
-	if err == nil {
-		return nil, nil, err
+	err := os.Mkdir(path, 0766)
+	if err != nil && !os.IsExist(err) {
+		return attacks.Attack{}, captures.Capture{}, err
 	}
 
 	path += "go-wifi"
-	cmd := exec.Command("airodump-ng", "--write", path, "-c", a.Channel, "--output-format", "pcap", "--bssid", a.Bssid, iface)
+	cmd := exec.Command("airodump-ng", "--write", path, "-c", strconv.Itoa(a.Channel), "--output-format", "pcap", "--bssid", a.Bssid, iface)
 
 	err = cmd.Start() // Do not wait
 
@@ -156,7 +156,7 @@ func (a *AP) Capture(iface string) (attacks.Attack, captures.Capture, error) {
 		Started: time.Now().String(),
 	}
 
-	if err != nil {
+	if err == nil {
 		cur_atk.Running = true
 		cur_atk.Init(cmd.Process)
 	}
