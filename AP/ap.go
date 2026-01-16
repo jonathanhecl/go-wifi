@@ -28,8 +28,8 @@ import (
 
 	"os/exec"
 
-	"../attacks"
-	"../captures"
+	"github.com/developpsoft/go-wifi/attacks"
+	"github.com/developpsoft/go-wifi/captures"
 )
 
 // JSON exportable structs
@@ -84,7 +84,7 @@ func (a *AP) Deauth(iface string) (attacks.Attack, error) {
 		Started: time.Now().String(),
 	}
 
-	if err != nil {
+	if err == nil {
 		cur_atk.Running = true
 		cur_atk.Init(cmd.Process)
 	}
@@ -123,7 +123,7 @@ func (a *AP) ArpReplay(iface string) (attacks.Attack, error) {
 		Started: time.Now().String(),
 	}
 
-	if err != nil {
+	if err == nil {
 		cur_atk.Running = true
 		cur_atk.Init(cmd.Process)
 	}
