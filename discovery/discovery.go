@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"../AP"
+	"github.com/developpsoft/go-wifi/AP"
 )
 
 // WARNING in order to use airodump-ng, you may need root access
@@ -48,6 +48,12 @@ type Discovery struct {
 
 // Stop the discovery...
 func (d *Discovery) Stop() error {
+	if d.process == nil {
+		d.Running = false
+		d.Stopped = time.Now().String()
+		return nil
+	}
+
 	err := d.process.Kill()
 	if err != nil {
 		return err
@@ -97,7 +103,7 @@ func (d *Discovery) Parse() error {
 			break
 		}
 		if csv_err != nil {
-			return err
+			return csv_err
 		}
 
 		// Okay, fill an AP struct then append to the dump
@@ -139,7 +145,7 @@ func (d *Discovery) Parse() error {
 			break
 		}
 		if csv_err != nil {
-			return err
+			return csv_err
 		}
 
 		// Okay, fill a Client struct then append to the dump
