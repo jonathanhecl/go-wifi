@@ -73,34 +73,36 @@ func TestAttack_Stop(t *testing.T) {
 		}
 	})
 
-	t.Run("Stop with process kills process and sets stopped time", func(t *testing.T) {
+	t.Run("Stop with process sets stopped time even if kill fails", func(t *testing.T) {
 		attack := &Attack{
 			Type:    "Deauth",
 			Target:  "00:11:22:33:44:55",
 			Running: true,
 		}
 
-		// Create a dummy process for testing
-		// Use sleep command that will run briefly
-		proc := os.Getpid()
-		procObj, err := os.FindProcess(proc)
-		if err != nil {
-			t.Fatalf("Failed to find process: %v", err)
-		}
+		// Create a process reference (we can't easily kill processes in tests,
+		// so we'll test that Stop handles the case properly)
+		// Using an invalid PID that will fail to kill, but tests the logic
+		procObj, _ := os.FindProcess(999999) // Invalid PID
 
 		attack.process = procObj
 		attack.Running = true
 
-		// Stop should handle gracefully even if process doesn't exist or can't be killed
-		// (in this case, we can't kill our own process, but we can test the logic)
-		err = attack.Stop()
+		// Stop should attempt to kill and set stopped time
+		// Even if kill fails, Running should be false and Stopped should be set
+		err := attack.Stop()
 
+		// On Windows, killing a non-existent process may not return an error
+		// So we just check that the state was updated
 		if attack.Running {
 			t.Error("Expected Running to be false after Stop")
 		}
 		if attack.Stopped == "" {
 			t.Error("Expected Stopped time to be set")
 		}
+
+		// Error handling is acceptable in this case
+		_ = err
 	})
 }
 
