@@ -140,7 +140,7 @@ func (c *Capture) crackWPA(dict string) string {
 func (c *Capture) crackWEP() string {
 	// Start with PTW
 	// I use a random file so you can run the func in parallel
-	path_to_key := os.TempDir() + "go-wifi_key" + strconv.Itoa(rand.Uint32())
+	path_to_key := os.TempDir() + "go-wifi_key" + strconv.Itoa(int(rand.Uint32()))
 
 	// If the file exist, delete it
 	os.Remove(path_to_key)
@@ -162,7 +162,7 @@ func (c *Capture) crackWEP() string {
 		key_buf, err = ioutil.ReadFile(path_to_key)
 		if err != nil {
 			// Korek and PTW failed, exit
-			return nil
+			return ""
 		}
 	}
 
@@ -184,12 +184,12 @@ func (c *Capture) checkForHandshake() {
 
 	file.WriteString("that_is_a_fake_key_no_one_will_use")
 
-	cmd := exec.Command("aircrack-ng",  "-a", "2", "-w", path, "-b", "c.Target.Bssid", "c.pcap_file")
+	cmd := exec.Command("aircrack-ng", "-a", "2", "-w", path, "-b", c.Target.Bssid, c.pcap_file)
 
-	ouptut, err2 := cmd.Output()
+	output, err2 := cmd.Output()
 
 	if err2 == nil {
-		if strings.Contains(string(ouptut), "Passphrase not in dictionary") {
+		if strings.Contains(string(output), "Passphrase not in dictionary") {
 			c.Handshake = true
 		} else {
 			c.Handshake = false
@@ -202,5 +202,5 @@ func (c *Capture) checkForHandshake() {
 
 func (c *Capture) getIVs() {
 	// TODO: count ivs!
-	c.IVs = nil
+	c.IVs = 0
 }
