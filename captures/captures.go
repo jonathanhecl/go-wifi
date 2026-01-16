@@ -69,7 +69,7 @@ func (c *Capture) Init(path_to_captures string, privacy string, bssid string, es
 func (c *Capture) TryKeys(keys ...string) string {
 	if c.Target.Privacy == "WEP" || c.Target.Privacy == "OPN" {
 		// Only wpa
-		return nil
+		return ""
 	}
 
 	// build a temp dict
@@ -78,7 +78,7 @@ func (c *Capture) TryKeys(keys ...string) string {
 	file, err := os.Create(path)
 	if err != nil {
 		// Got an error, exit
-		return
+		return ""
 	}
 	defer file.Close()
 	defer os.Remove(path)
@@ -90,25 +90,25 @@ func (c *Capture) TryKeys(keys ...string) string {
 	return c.crackWPA(path)
 }
 
-// Return ascii key; if cracking WEP dict can be null
+// Return ascii key; if cracking WEP dict can be empty
 func (c *Capture) AttemptToCrack(dict string) string {
 	// Do not crack a second time!
-	if c.Key != nil {
+	if c.Key != "" {
 		return c.Key
 	}
 
 	// Start here
 	var key string
 
-	if (c.Target.Privacy == "WPA" || c.Target.Privacy == "WPA2") && dict != nil {
+	if (c.Target.Privacy == "WPA" || c.Target.Privacy == "WPA2") && dict != "" {
 		key = c.crackWPA(dict)
 	} else if c.Target.Privacy == "WEP" {
 		key = c.crackWEP()
 	} else {
-		key = nil
+		key = ""
 	}
 
-	if key != nil {
+	if key != "" {
 		c.Key = key
 	}
 
@@ -117,7 +117,7 @@ func (c *Capture) AttemptToCrack(dict string) string {
 
 func (c *Capture) crackWPA(dict string) string {
 	// I use a random file so you can run the func in parallel
-	path_to_key := os.TempDir() + "go-wifi_key" + strconv.Itoa(rand.Uint32())
+	path_to_key := os.TempDir() + "go-wifi_key" + strconv.Itoa(int(rand.Uint32()))
 
 	// If the file exist, delete it
 	os.Remove(path_to_key)
@@ -131,7 +131,7 @@ func (c *Capture) crackWPA(dict string) string {
 	key_buf, err := ioutil.ReadFile(path_to_key)
 	if err != nil {
 		// no key found
-		return nil
+		return ""
 	}
 
 	return string(key_buf)
